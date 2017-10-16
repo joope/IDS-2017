@@ -14,6 +14,9 @@ api = 'http://siika.es:1337/motion'
 prev = []
 new = []
 
+if(sys.argv[1]):
+    interval = sys.argv[1]
+
 sources = [
     'http://haba.tko-aly.fi/kuvat/webcam1.jpg',
     'http://haba.tko-aly.fi/kuvat/webcam2.jpg'
@@ -113,7 +116,7 @@ def fetchImages():
     return images
 
 
-def mainLoop(interval, maxIterations=1000):
+def main(interval, maxIterations=1000):
     prev = fetchImages()
     i = 0
     while i < maxIterations:
@@ -126,8 +129,11 @@ def mainLoop(interval, maxIterations=1000):
         prev = processImages(prev, new)
               
         i += 1
-
-mainLoop(60)
-
+        
+if __name__ == "__main__":
+    if(sys.argv[1]):
+        main(int(sys.argv[1]))
+    else:
+        main(60)
 
             
