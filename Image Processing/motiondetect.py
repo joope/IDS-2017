@@ -75,7 +75,7 @@ def compareImages(prev, new):
     relativeThresholdChange = thresholdChange / maxPixelValue
 
     # Uncomment to view the images:
-    showImageAndWait(diff)
+    # showImageAndWait(diff)
     # showImageAndWait(thresh)
 
     # Discard data if change is too much (i.e light switched off)
