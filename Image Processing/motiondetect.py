@@ -7,15 +7,11 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 br = 5
-kernel = numpy.ones((5,5), numpy.uint8)
-interval = 10
+interval = 60
 
 api = 'http://siika.es:1337/motion'
 prev = []
 new = []
-
-if(sys.argv[1]):
-    interval = sys.argv[1]
 
 sources = [
     'http://haba.tko-aly.fi/kuvat/webcam1.jpg',
@@ -128,9 +124,9 @@ def main(interval, maxIterations=2880):     # 2880 minutes = 48 hours
         i += 1
         
 if __name__ == "__main__":
-    if(sys.argv > 1):
+    if len(sys.argv) > 1:
         main(int(sys.argv[1]))
     else:
-        main(60)
+        main(interval)
 
             
