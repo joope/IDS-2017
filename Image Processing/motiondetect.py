@@ -56,10 +56,7 @@ def showImageAndWait(img):
 
 def compareImages(prev, new):
 
-    img1 = prev
-    img2 = cv2.blur(new, (br,br))
-        
-    diff = cv2.absdiff(img1, img2)
+    diff = cv2.absdiff(prev, new)
     ret, thresh = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
 
     # Absolute change in pixel values
@@ -96,8 +93,7 @@ def compareImages(prev, new):
 def processImages(prev, new):
     processed = []
     for i, img in enumerate(new):
-        blurred = cv2.blur(img, (br,br))
-        processed.append(cv2.addWeighted(prev[i], 0.5, blurred, 0.5, 0))
+        processed.append(cv2.addWeighted(prev[i], 0.5, new[i], 0.5, 0))
 
     return processed
 
@@ -111,12 +107,13 @@ def sendData(data, location):
 def fetchImages():
     images = []
     for cam in sources:
-        images.append(getImageFromUrl(cam))
+        blurred = cv2.blur(getImageFromUrl(cam), (br,br))
+        images.append(blurred)
         
     return images
 
 
-def main(interval, maxIterations=1000):
+def main(interval, maxIterations=2880):     # 2880 minutes = 48 hours
     prev = fetchImages()
     i = 0
     while i < maxIterations:
