@@ -127,7 +127,7 @@ def mainLoop(interval, maxIterations=1000):
               
         i += 1
 
-mainLoop(10)
+mainLoop(60)
 
 
             
