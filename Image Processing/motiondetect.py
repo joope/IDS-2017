@@ -128,7 +128,7 @@ def main(interval, maxIterations=2880):     # 2880 minutes = 48 hours
         i += 1
         
 if __name__ == "__main__":
-    if(sys.argv[1]):
+    if(sys.argv > 1):
         main(int(sys.argv[1]))
     else:
         main(60)
