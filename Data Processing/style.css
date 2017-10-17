@@ -1,0 +1,11 @@
+.title {
+    text-align: center;
+}
+
+.left_column {
+	float: left;
+}
+
+.right_column {
+	float: right;
+}
