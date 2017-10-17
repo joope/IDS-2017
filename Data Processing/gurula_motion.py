@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as dates
 
 response = urllib.request.urlopen('http://siika.es:1337/motion')
-data = json.load(response)
+data = json.loads(response.read().decode())
 
 # Parameters
 year = 2017
 month = 10
-day = 16
+day = 17
 hour_max = 24
 hour_min = 6
 
