@@ -5,9 +5,13 @@ import numpy
 import urllib.request
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from collections import deque
+
+# Allows generating plots without display device
+mpl.use('Agg')
 
 br = 5
 interval = 60

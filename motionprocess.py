@@ -3,10 +3,14 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
 import pytz
 import sys
+
+# Allows generating plots without display device
+mpl.use('Agg')
 
 def get_data():
     response = urllib.request.urlopen('http://siika.es:1337/motion')
@@ -54,6 +58,8 @@ def filter(df, year, month, day, hour_min, hour_max):
     return df
 
 def line_plot(df, change_type, image_name):
+
+
 
     locator = dates.HourLocator(range(0, 24, 1))
     formatter = dates.DateFormatter('%H')
