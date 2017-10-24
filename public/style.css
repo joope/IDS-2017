@@ -1,13 +1,10 @@
 .title {
-    text-align: center;
+  text-align: center;
 }
 
-.left_column {
-	float: left;
-	width: 45%;
+td {
+	width: 50%;
 }
-
-.right_column {
-	float: right;
-	width: 45%;
+img {
+  max-width: 100%;
 }

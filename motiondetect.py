@@ -24,14 +24,14 @@ sources = [
 ]
 
 seatCoordinates = [
-    (960, 400), 
-    (800, 500), 
-    (610, 595), 
-    (415, 745), 
-    (600, 915), 
-    (750, 1060), 
-    (1340, 1030), 
-    (1565, 800), 
+    (960, 400),
+    (800, 500),
+    (610, 595),
+    (415, 745),
+    (600, 915),
+    (750, 1060),
+    (1340, 1030),
+    (1565, 800),
     (1735, 615)]
 
 # Read image from url as greyscale
@@ -100,10 +100,10 @@ def getDiff(prev, new):
     return thresh / 255
 
 def updateHeatmap(diff):
-    if len(heatmap) >= 60:
+    if len(heatmap) >= 30:
         heatmap.popleft()
     heatmap.append(diff)
-    
+
 
 def normalize(heatmap):
     maxp = numpy.amax(heatmap)
@@ -124,7 +124,7 @@ def generateHeatmap(heatmap, room_id):
     plt.figure(figsize=(20,10))
     hmap = plt.imshow(normalize(combined))
     hmap.set_cmap('nipy_spectral')
-    plt.savefig('heatmap' + room_id + '.png', bbox_inches='tight')
+    plt.savefig('heatmap_' + room_id + '.png', bbox_inches='tight')
     plt.close()
 
 def main(url, room_id, interval, maxIterations):
@@ -138,12 +138,12 @@ def main(url, room_id, interval, maxIterations):
         data = compareImages(prev, new)
         updateHeatmap(getDiff(prev, new))
         generateHeatmap(heatmap, room_id)
-        
+
         sendData(api, data, room_id)
         prev = processImages(prev, new)
-        
+
         i += 1
-        
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print('Missing parameters: url(address to fetch images) room_id(integer) interval(minutes) max_iterations(-1 for infinite)')
@@ -152,7 +152,5 @@ if __name__ == "__main__":
         room_id = sys.argv[2]
         interval = int(sys.argv[3])
         max_iterations = int(sys.argv[4])
-        
-        main(url, room_id, interval, max_iterations)
 
-            
+        main(url, room_id, interval, max_iterations)

@@ -67,13 +67,15 @@ def line_plot(df, change_type, image_name):
     plt.plot(df['createdAt'],df[change_type])
     plt.savefig(image_name, bbox_inches='tight')
 
+
 if __name__ == "__main__":
 
     # Parameters
     if sys.argv.__len__() < 9:
-        year = 2017
-        month = 10
-        day = 20
+        now = datetime.now()
+        year = now.year
+        month = now.month
+        day = now.day
         hour_min = 6
         hour_max = 24
         change_type = 'rel_change'
