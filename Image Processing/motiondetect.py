@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from collections import deque
 
 br = 5
 interval = 60
@@ -15,6 +16,7 @@ api = 'http://siika.es:1337/motion'
 heatmap_api = 'http://siika.es:1337/heatmap'
 prev = []
 new = []
+heatmap = deque()
 
 sources = [
     'http://haba.tko-aly.fi/kuvat/webcam1.jpg',
@@ -90,25 +92,22 @@ def compareImages(prev, new):
     return data
 
 def processImages(prev, new):
-    processed = []
-    for i, img in enumerate(new):
-        processed.append(cv2.addWeighted(prev[i], 0.5, new[i], 0.5, 0))
-
-    return processed
+    return cv2.addWeighted(prev, 0.5, new, 0.5, 0)
 
 def getDiff(prev, new):
     diff = cv2.absdiff(prev, new)
     ret, thresh = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
     return thresh / 255
 
-def updateHeatmap(heatmap, diff):
-    return numpy.add(heatmap, diff)
+def updateHeatmap(diff):
+    if len(heatmap) >= 60:
+        heatmap.popleft()
+    heatmap.append(diff)
+    
 
 def normalize(heatmap):
     maxp = numpy.amax(heatmap)
-    normalized = heatmap / maxp
-
-    return normalized
+    return heatmap / maxp
 
 def sendData(api, data, location):
     if(data):
@@ -117,52 +116,43 @@ def sendData(api, data, location):
         json = urlopen(request).read().decode()
         print(json)
 
-def saveHeatmaps(heatmap1, heatmap2):
+def generateHeatmap(heatmap, room_id):
+    combined = numpy.zeros((1080, 1920), numpy.uint16)
+    for h in heatmap:
+        combined = numpy.add(combined, h)
     plt.axis('off')
     plt.figure(figsize=(20,10))
-    hmap = plt.imshow(normalize(heatmap1))
+    hmap = plt.imshow(normalize(combined))
     hmap.set_cmap('nipy_spectral')
-    plt.savefig('heatmap1.png', bbox_inches='tight')
-
-    hmap2 = plt.imshow(normalize(heatmap2))
-    hmap2.set_cmap('nipy_spectral')
-    plt.savefig('heatmap2.png', bbox_inches='tight')
+    plt.savefig('heatmap' + room_id + '.png', bbox_inches='tight')
     plt.close()
 
-def fetchImages():
-    images = []
-    for cam in sources:
-        blurred = cv2.blur(getImageFromUrl(cam), (br,br))
-        images.append(blurred)
-        
-    return images
-
-
-def main(interval, maxIterations=2880):     # 2880 minutes = 48 hours
-    prev = fetchImages()
-    heatmap1 = numpy.zeros((1080, 1920), numpy.uint32)
-    heatmap2 = numpy.zeros((1080, 1920), numpy.uint32)
+def main(url, room_id, interval, maxIterations):
+    prev = cv2.blur(getImageFromUrl(url), (br,br))
+    heatmap.append(numpy.zeros((1080, 1920), numpy.uint8))
 
     i = 0
-    while i < maxIterations:
+    while i != maxIterations:
         time.sleep(interval)
-        new = fetchImages()
-        data1 = compareImages(prev[0], new[0])
-        data2 = compareImages(prev[1], new[1])
-        heatmap1 = updateHeatmap(heatmap1, getDiff(prev[0], new[0]))
-        heatmap2 = updateHeatmap(heatmap2, getDiff(prev[1], new[1]))
-        saveHeatmaps(heatmap1, heatmap2)
-
-        sendData(api, data1, 0)
-        sendData(api, data2, 1)
-        prev = new
+        new = cv2.blur(getImageFromUrl(url), (br,br))
+        data = compareImages(prev, new)
+        updateHeatmap(getDiff(prev, new))
+        generateHeatmap(heatmap, room_id)
+        
+        sendData(api, data, room_id)
+        prev = processImages(prev, new)
         
         i += 1
         
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main(int(sys.argv[1]))
+    if len(sys.argv) < 4:
+        print('Missing parameters: url(address to fetch images) room_id(integer) interval(minutes) max_iterations(-1 for infinite)')
     else:
-        main(interval)
+        url = sys.argv[1]
+        room_id = sys.argv[2]
+        interval = int(sys.argv[3])
+        max_iterations = int(sys.argv[4])
+        
+        main(url, room_id, interval, max_iterations)
 
             
