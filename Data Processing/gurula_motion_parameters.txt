@@ -1,8 +1,0 @@
-1. year
-2. month
-3. day
-4. earliest hour to be shown
-5. latest hour to be shown
-6. change type used (abs_change, rel_change, thresh_change)
-7. plot type (only Line now)
-8. image filenames
