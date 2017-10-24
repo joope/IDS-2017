@@ -60,19 +60,12 @@ def line_plot(df, change_type, image_name):
 
     # Set y axis height
     y_height = df[change_type].max()
-
+    plt.figure(figsize=(20,10))
     plt.gca().xaxis.set_major_formatter(formatter)
     plt.gca().xaxis.set_major_locator(locator)
     plt.ylim((0,y_height))
-    plt.plot(first['createdAt'],first[change_type])
-    plt.savefig(image_name)
-
-    plt.figure(2)
-    plt.gca().xaxis.set_major_formatter(formatter)
-    plt.gca().xaxis.set_major_locator(locator)
-    plt.ylim((0,y_height))
-    plt.plot(second['createdAt'],second[change_type])
-    plt.savefig(image_name)
+    plt.plot(df['createdAt'],df[change_type])
+    plt.savefig(image_name, bbox_inches='tight')
 
 if __name__ == "__main__":
 
@@ -81,9 +74,9 @@ if __name__ == "__main__":
         year = 2017
         month = 10
         day = 20
-        hour_min = 8
-        hour_max = 19
-        change_type = 'thresh_change'
+        hour_min = 6
+        hour_max = 24
+        change_type = 'rel_change'
         plot_type = 'Line'
         image_name = 'line'
     else:
