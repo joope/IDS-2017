@@ -5,11 +5,14 @@ import numpy
 import urllib.request
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 br = 5
 interval = 60
 
 api = 'http://siika.es:1337/motion'
+heatmap_api = 'http://siika.es:1337/heatmap'
 prev = []
 new = []
 
@@ -93,12 +96,38 @@ def processImages(prev, new):
 
     return processed
 
-def sendData(data, location):
+def getDiff(prev, new):
+    diff = cv2.absdiff(prev, new)
+    ret, thresh = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
+    return thresh / 255
+
+def updateHeatmap(heatmap, diff):
+    return numpy.add(heatmap, diff)
+
+def normalize(heatmap):
+    maxp = numpy.amax(heatmap)
+    normalized = heatmap / maxp
+
+    return normalized
+
+def sendData(api, data, location):
     if(data):
         data['location'] = location
         request = Request(api, urlencode(data).encode())
         json = urlopen(request).read().decode()
         print(json)
+
+def saveHeatmaps(heatmap1, heatmap2):
+    plt.axis('off')
+    plt.figure(figsize=(20,10))
+    hmap = plt.imshow(normalize(heatmap1))
+    hmap.set_cmap('nipy_spectral')
+    plt.savefig('heatmap1.png', bbox_inches='tight')
+
+    hmap2 = plt.imshow(normalize(heatmap2))
+    hmap2.set_cmap('nipy_spectral')
+    plt.savefig('heatmap2.png', bbox_inches='tight')
+    plt.close()
 
 def fetchImages():
     images = []
@@ -111,16 +140,23 @@ def fetchImages():
 
 def main(interval, maxIterations=2880):     # 2880 minutes = 48 hours
     prev = fetchImages()
+    heatmap1 = numpy.zeros((1080, 1920), numpy.uint32)
+    heatmap2 = numpy.zeros((1080, 1920), numpy.uint32)
+
     i = 0
     while i < maxIterations:
         time.sleep(interval)
         new = fetchImages()
         data1 = compareImages(prev[0], new[0])
         data2 = compareImages(prev[1], new[1])
-        sendData(data1, 0)
-        sendData(data2, 1)
-        prev = processImages(prev, new)
-              
+        heatmap1 = updateHeatmap(heatmap1, getDiff(prev[0], new[0]))
+        heatmap2 = updateHeatmap(heatmap2, getDiff(prev[1], new[1]))
+        saveHeatmaps(heatmap1, heatmap2)
+
+        sendData(api, data1, 0)
+        sendData(api, data2, 1)
+        prev = new
+        
         i += 1
         
 if __name__ == "__main__":
