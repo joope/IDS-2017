@@ -12,7 +12,7 @@ import matplotlib.dates as dates
 import pytz
 import sys
 
-
+folder = 'public/'
 
 def get_data():
     response = urllib.request.urlopen('http://siika.es:1337/motion')
@@ -82,7 +82,7 @@ def line_plot(df, change_type, image_name):
     plt.gca().xaxis.set_major_locator(locator)
     plt.ylim((0,y_height))
     plt.plot(df['createdAt'],df[change_type])
-    plt.savefig(image_name, bbox_inches='tight')
+    plt.savefig(folder + image_name, bbox_inches='tight')
 
 
 if __name__ == "__main__":
@@ -109,27 +109,24 @@ if __name__ == "__main__":
         plot_type = sys.argv[7]
         image_name = sys.argv[8]
 
-    print(year, month, day, hour_min, hour_max)
-
     data = get_data()
 
     df = normalize(data)
     #
     # df = filter(df, year, month, day, hour_min, hour_max)
     df = filter_last_hours(df, 8)
-    #
-    # # Separate images
-    # first = df.loc[df['location'] == '0']
-    # second = df.loc[df['location'] == '1']
-    #
-    # if plot_type == 'Line':
-    #     line_plot(first, change_type, image_name + '_1.png')
-    #     plt.figure(2)
-    #     line_plot(second, change_type, image_name + '_2.png')
-#if plot_type == 'Bar':
-    #     second = pd.DataFrame(first[change_type].astype(float))
-    #     second['day'] = first['day']
-    #     hour_bars = second.groupby(second['day'])['rel_change'].mean()
-    #     hour_bars.plot.bar()
-    #     plt.savefig(image_name, bbox_inches='tight')
-    #
+
+    # Separate images
+    first = df.loc[df['location'] == '0']
+    second = df.loc[df['location'] == '1']
+
+    if plot_type == 'Line':
+        line_plot(first, change_type, image_name + '_1.png')
+        plt.figure(2)
+        line_plot(second, change_type, image_name + '_2.png')
+    if plot_type == 'Bar':
+        second = pd.DataFrame(first[change_type].astype(float))
+        second['day'] = first['day']
+        hour_bars = second.groupby(second['day'])['rel_change'].mean()
+        hour_bars.plot.bar()
+        plt.savefig(image_name, bbox_inches='tight')

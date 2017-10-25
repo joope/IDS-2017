@@ -14,7 +14,9 @@ from collections import deque
 
 
 
-br = 5
+br = 10
+imageSize = (1280, 720)
+folder = 'public/'
 interval = 60
 
 api = 'http://siika.es:1337/motion'
@@ -44,7 +46,7 @@ def getImageFromUrl(url):
     res = urllib.request.urlopen(url)
     img = numpy.asarray(bytearray(res.read()), dtype="uint8")
     img = cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)
-
+    img = cv2.resize(img, imageSize)
     return img
 
 def checkSofas(img):
@@ -101,8 +103,8 @@ def processImages(prev, new):
 
 def getDiff(prev, new):
     diff = cv2.absdiff(prev, new)
-    ret, thresh = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
-    return thresh / 255
+    ret, diff = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
+    return diff
 
 def updateHeatmap(diff):
     if len(heatmap) >= 30:
@@ -122,19 +124,20 @@ def sendData(api, data, location):
         print(json)
 
 def generateHeatmap(heatmap, room_id):
-    combined = numpy.zeros((1080, 1920), numpy.uint16)
+    combined = numpy.zeros((imageSize[1], imageSize[0]), numpy.uint16)
     for h in heatmap:
         combined = numpy.add(combined, h)
     plt.axis('off')
     plt.figure(figsize=(20,10))
     hmap = plt.imshow(normalize(combined))
-    hmap.set_cmap('nipy_spectral')
-    plt.savefig('heatmap_' + room_id + '.png', bbox_inches='tight')
+    hmap.set_cmap('gnuplot2')
+    plt.axis('off')
+    plt.savefig(folder + 'heatmap_' + room_id + '.png', bbox_inches='tight')
     plt.close()
 
 def main(url, room_id, interval, maxIterations):
     prev = cv2.blur(getImageFromUrl(url), (br,br))
-    heatmap.append(numpy.zeros((1080, 1920), numpy.uint8))
+    heatmap.append(numpy.zeros((imageSize[1], imageSize[0]), numpy.uint8))
 
     i = 0
     while i != maxIterations:
