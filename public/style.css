@@ -19,6 +19,7 @@
 }
 
 .transparent:hover {
+  opacity: 0.0;
 }
 
 td {
