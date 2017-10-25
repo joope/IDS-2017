@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import timedelta
 import matplotlib as mpl
 # Allows generating plots without display device
 mpl.use('Agg')
@@ -54,7 +55,7 @@ def filter(df, year, month, day, hour_min, hour_max):
     df = df.loc[df['year'] == year]
     df = df.loc[df['month'] == month]
     df = df.loc[df['day'] == day]
-    df = df.loc[df['hour'] < hour_max]
+    df = df.loc[df['hour'] <= hour_max]
     df = df.loc[df['hour'] >= hour_min]
     return df
 
@@ -80,11 +81,12 @@ if __name__ == "__main__":
     # Parameters
     if sys.argv.__len__() < 9:
         now = datetime.now()
+        minTime = now - timedelta(hours=8)
         year = now.year
         month = now.month
         day = now.day
-        hour_min = 6
-        hour_max = 24
+        hour_min = minTime.hour
+        hour_max = now.hour
         change_type = 'rel_change'
         plot_type = 'Line'
         image_name = 'line'
@@ -97,6 +99,8 @@ if __name__ == "__main__":
         change_type = sys.argv[6]
         plot_type = sys.argv[7]
         image_name = sys.argv[8]
+
+    print(year, month, day, hour_min, hour_max)
 
     data = get_data()
 
