@@ -14,8 +14,8 @@ from collections import deque
 
 
 
-br = 10
-imageSize = (1280, 720)
+br = 5
+imageSize = (640, 360)
 folder = 'public/'
 interval = 60
 
@@ -130,7 +130,7 @@ def generateHeatmap(heatmap, room_id):
     plt.axis('off')
     plt.figure(figsize=(20,10))
     hmap = plt.imshow(normalize(combined))
-    hmap.set_cmap('gnuplot2')
+    hmap.set_cmap('nipy_spectral')
     plt.axis('off')
     plt.savefig(folder + 'heatmap_' + room_id + '.png', bbox_inches='tight')
     plt.close()
