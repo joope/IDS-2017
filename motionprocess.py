@@ -9,6 +9,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
+import seaborn as sns
 import pytz
 import sys
 
@@ -130,3 +131,20 @@ if __name__ == "__main__":
         hour_bars = second.groupby(second['day'])['rel_change'].mean()
         hour_bars.plot.bar()
         plt.savefig(image_name, bbox_inches='tight')
+        
+    df = normalize(data)
+    df=df[['rel_change','hour']]
+    grouped_df = df.groupby('hour')
+    mean_df = grouped_df.sum()/ grouped_df.count()
+  
+    plt.figure(figsize=(20, 10))
+    fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
+    fig.axes.set_title('Change vs. Hours', fontsize=30,color="r",alpha=0.5)
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Change")
+    
+    plt.figure(figsize=(20, 10))
+    fig=mean_df.plot(kind='bar', colormap='jet', title='Average day rush hours')
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Change")
+    mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)
