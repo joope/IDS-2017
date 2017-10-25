@@ -18,6 +18,9 @@
   margin-left: -10px;
 }
 
+.transparent:hover {
+}
+
 td {
 	width: 50%;
   position: relative;
