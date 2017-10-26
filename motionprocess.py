@@ -71,18 +71,18 @@ def filter_last_hours(df, hours):
 
 def line_plot(df, change_type, image_name):
 
-
-
+    mean = df[change_type].rolling(30).mean()
+    change_type = 'mean'
     locator = dates.HourLocator(range(0, 24, 1))
     formatter = dates.DateFormatter('%H')
 
     # Set y axis height
-    y_height = df[change_type].max()
+    y_height = mean.max()
     plt.figure(figsize=(20,10))
     plt.gca().xaxis.set_major_formatter(formatter)
     plt.gca().xaxis.set_major_locator(locator)
     plt.ylim((0,y_height))
-    plt.plot(df['createdAt'],df[change_type])
+    plt.plot(df['createdAt'],mean)
     plt.savefig(folder + image_name, bbox_inches='tight')
 
 
@@ -131,20 +131,20 @@ if __name__ == "__main__":
         hour_bars = second.groupby(second['day'])['rel_change'].mean()
         hour_bars.plot.bar()
         plt.savefig(image_name, bbox_inches='tight')
-        
-    df = normalize(data)
-    df=df[['rel_change','hour']]
-    grouped_df = df.groupby('hour')
-    mean_df = grouped_df.sum()/ grouped_df.count()
-  
-    plt.figure(figsize=(20, 10))
-    fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
-    fig.axes.set_title('Change vs. Hours', fontsize=30,color="r",alpha=0.5)
-    fig.set_xlabel("Hours")
-    fig.set_ylabel("Change")
-    
-    plt.figure(figsize=(20, 10))
-    fig=mean_df.plot(kind='bar', colormap='jet', title='Average day rush hours')
-    fig.set_xlabel("Hours")
-    fig.set_ylabel("Change")
-    mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)
+
+    # df = normalize(data)
+    # df=df[['rel_change','hour']]
+    # grouped_df = df.groupby('hour')
+    # mean_df = grouped_df.sum()/ grouped_df.count()
+    #
+    # plt.figure(figsize=(20, 10))
+    # fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
+    # fig.axes.set_title('Change vs. Hours', fontsize=30,color="r",alpha=0.5)
+    # fig.set_xlabel("Hours")
+    # fig.set_ylabel("Change")
+    #
+    # plt.figure(figsize=(20, 10))
+    # fig=mean_df.plot(kind='bar', colormap='jet', title='Average day rush hours')
+    # fig.set_xlabel("Hours")
+    # fig.set_ylabel("Change")
+    # mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)

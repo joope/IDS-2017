@@ -8,14 +8,10 @@
   top: 0;
 }
 
-.top {
-  z-index: 2;
-}
-
 .transparent {
-  opacity: 0.5;
-  transform: scale(1.03, 1.04);
-  margin-left: -10px;
+  opacity: 0.7;
+  transform: scale(1.05, 1.04);
+  margin-left: -1%;
 }
 
 .transparent:hover {
