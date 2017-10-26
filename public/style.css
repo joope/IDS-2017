@@ -2,28 +2,28 @@
   text-align: center;
 }
 
-.overlay > img {
+.original {
+  z-index: -1;
+}
+
+.heatmap {
+  opacity: 0.7;
+  transform: scale(1.05, 1.04);
+  margin-left: -1%;
   position: absolute;
   left: 0;
   top: 0;
 }
 
-.transparent {
-  opacity: 0.7;
-  transform: scale(1.05, 1.04);
-  margin-left: -1%;
-}
-
-.transparent:hover {
+.heatmap:hover {
   opacity: 0.0;
 }
 
 td {
-	width: 50%;
+  overflow: hidden;
   position: relative;
-  /*overflow-x: hidden;*/
-  /*overflow: hidden;*/
 }
+
 img {
   max-width: 100%;
 }
