@@ -1,4 +1,4 @@
-.title {
+.centertext {
   text-align: center;
 }
 
@@ -25,5 +25,5 @@ td {
 }
 
 img {
-  max-width: 100%;
+  width: 100%;
 }
