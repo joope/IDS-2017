@@ -133,19 +133,26 @@ if __name__ == "__main__":
         hour_bars.plot.bar()
         plt.savefig(image_name, bbox_inches='tight')
 
-    # df = normalize(data)
-    # df=df[['rel_change','hour']]
-    # grouped_df = df.groupby('hour')
-    # mean_df = grouped_df.sum()/ grouped_df.count()
-    #
-    # plt.figure(figsize=(20, 10))
-    # fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
-    # fig.axes.set_title('Change vs. Hours', fontsize=30,color="r",alpha=0.5)
-    # fig.set_xlabel("Hours")
-    # fig.set_ylabel("Change")
-    #
-    # plt.figure(figsize=(20, 10))
-    # fig=mean_df.plot(kind='bar', colormap='jet', title='Average day rush hours')
-    # fig.set_xlabel("Hours")
-    # fig.set_ylabel("Change")
-    # mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)
+    df = normalize(data)
+    df=df[['rel_change','hour']]
+    grouped_df = df.groupby('hour')
+    mean_df = grouped_df.sum()/ grouped_df.count()
+  
+    plt.figure(figsize=(20, 10))
+    fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
+    fig.axes.set_title('Activity trend line', fontsize=30,color="r",alpha=0.5)
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Activity")
+    plt.savefig(os.path.join(folder, 'activity_trend.png'), bbox_inches='tight')
+   
+    plt.figure(figsize=(5, 5))
+    fig=mean_df.plot(kind='bar', colormap='jet', title='Average activity by hour')
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Activity")
+    plt.savefig('Activity.png', bbox_inches='tight')
+    plt.savefig(os.path.join(folder, 'activity.png'), bbox_inches='tight')
+    #mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)
+    #plt.savefig(image_name, bbox_inches='tight')
+    #mean_df['hour'] =[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    #maxi=mean_df.loc[mean_df['rel_change'].idxmax()]
+    ##(maxi.hour,maxi.rel_change) is the maximum point in the last plot.
