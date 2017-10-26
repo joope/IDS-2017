@@ -3,10 +3,17 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import timedelta
+import matplotlib as mpl
+# Allows generating plots without display device
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
+import seaborn as sns
 import pytz
 import sys
+
+folder = 'public/'
 
 def get_data():
     response = urllib.request.urlopen('http://siika.es:1337/motion')
@@ -24,14 +31,17 @@ def normalize(data):
     df['day'] = pd.Series(np.ones(df.__len__()), index=df.index)
     df['hour'] = pd.Series(np.ones(df.__len__()), index=df.index)
     df['minute'] = pd.Series(np.ones(df.__len__()), index=df.index)
+    df['createdAt2'] = pd.to_datetime(df['createdAt'])
+    df['createdAt'] = df['createdAt2']
 
     for i in range(0, df.__len__()):
-        df.at[i, 'createdAt'] = df.at[i, 'createdAt'][:-1]  # Remove 'Z' at the end of the timestamps
-        df.at[i, 'createdAt'] = datetime.strptime(df.at[i, 'createdAt'], "%Y-%m-%dT%H:%M:%S.%f")  # Set datetime format
+        #df.at[i, 'createdAt'] = df.at[i, 'createdAt'][:-1]  # Remove 'Z' at the end of the timestamps
+        #df.at[i, 'createdAt'] = datetime.strptime(df.at[i, 'createdAt'], "%Y-%m-%dT%H:%M:%S.%f")  # Set datetime format
         time = df.at[i, 'createdAt']
         time = time.replace(tzinfo=utc)  # Set the time we got to utc
         time = time.astimezone(tz)  # Convert time to Helsinki timezone
         time = time.replace(tzinfo=utc)  # Plot doesn't handle timezones well. Make it think that the time is in utc
+        #pd.to_datetime(df['createdAt']).loc[pd.to_datetime(df['createdAt']) > minTime]
         df.at[i, 'createdAt'] = time
 
         # Set new column values
@@ -49,11 +59,19 @@ def filter(df, year, month, day, hour_min, hour_max):
     df = df.loc[df['year'] == year]
     df = df.loc[df['month'] == month]
     df = df.loc[df['day'] == day]
-    df = df.loc[df['hour'] < hour_max]
+    df = df.loc[df['hour'] <= hour_max]
     df = df.loc[df['hour'] >= hour_min]
     return df
 
+def filter_last_hours(df, hours):
+    now = datetime.now()
+    minTime = now - timedelta(hours=hours)
+    df = df.loc[df['createdAt'] > minTime]
+    return df
+
 def line_plot(df, change_type, image_name):
+
+
 
     locator = dates.HourLocator(range(0, 24, 1))
     formatter = dates.DateFormatter('%H')
@@ -65,17 +83,20 @@ def line_plot(df, change_type, image_name):
     plt.gca().xaxis.set_major_locator(locator)
     plt.ylim((0,y_height))
     plt.plot(df['createdAt'],df[change_type])
-    plt.savefig(image_name, bbox_inches='tight')
+    plt.savefig(folder + image_name, bbox_inches='tight')
+
 
 if __name__ == "__main__":
 
     # Parameters
     if sys.argv.__len__() < 9:
-        year = 2017
-        month = 10
-        day = 20
-        hour_min = 6
-        hour_max = 24
+        now = datetime.now()
+        minTime = now - timedelta(hours=8)
+        year = now.year
+        month = now.month
+        day = now.day
+        hour_min = minTime.hour
+        hour_max = now.hour
         change_type = 'rel_change'
         plot_type = 'Line'
         image_name = 'line'
@@ -92,8 +113,9 @@ if __name__ == "__main__":
     data = get_data()
 
     df = normalize(data)
-
-    df = filter(df, year, month, day, hour_min, hour_max)
+    #
+    # df = filter(df, year, month, day, hour_min, hour_max)
+    df = filter_last_hours(df, 8)
 
     # Separate images
     first = df.loc[df['location'] == '0']
@@ -103,3 +125,26 @@ if __name__ == "__main__":
         line_plot(first, change_type, image_name + '_1.png')
         plt.figure(2)
         line_plot(second, change_type, image_name + '_2.png')
+    if plot_type == 'Bar':
+        second = pd.DataFrame(first[change_type].astype(float))
+        second['day'] = first['day']
+        hour_bars = second.groupby(second['day'])['rel_change'].mean()
+        hour_bars.plot.bar()
+        plt.savefig(image_name, bbox_inches='tight')
+        
+    df = normalize(data)
+    df=df[['rel_change','hour']]
+    grouped_df = df.groupby('hour')
+    mean_df = grouped_df.sum()/ grouped_df.count()
+  
+    plt.figure(figsize=(20, 10))
+    fig= sns.regplot(df.hour, df.rel_change, lowess=True, color='g')
+    fig.axes.set_title('Change vs. Hours', fontsize=30,color="r",alpha=0.5)
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Change")
+    
+    plt.figure(figsize=(20, 10))
+    fig=mean_df.plot(kind='bar', colormap='jet', title='Average day rush hours')
+    fig.set_xlabel("Hours")
+    fig.set_ylabel("Change")
+    mean_df['rel_change'].plot(color = 'orange',linewidth=2.0)

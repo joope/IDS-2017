@@ -5,11 +5,18 @@ import numpy
 import urllib.request
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+import matplotlib as mpl
+# Allows generating plots without display device
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from collections import deque
 
+
+
 br = 5
+imageSize = (640, 360)
+folder = 'public/'
 interval = 60
 
 api = 'http://siika.es:1337/motion'
@@ -24,14 +31,14 @@ sources = [
 ]
 
 seatCoordinates = [
-    (960, 400), 
-    (800, 500), 
-    (610, 595), 
-    (415, 745), 
-    (600, 915), 
-    (750, 1060), 
-    (1340, 1030), 
-    (1565, 800), 
+    (960, 400),
+    (800, 500),
+    (610, 595),
+    (415, 745),
+    (600, 915),
+    (750, 1060),
+    (1340, 1030),
+    (1565, 800),
     (1735, 615)]
 
 # Read image from url as greyscale
@@ -39,7 +46,7 @@ def getImageFromUrl(url):
     res = urllib.request.urlopen(url)
     img = numpy.asarray(bytearray(res.read()), dtype="uint8")
     img = cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)
-
+    img = cv2.resize(img, imageSize)
     return img
 
 def checkSofas(img):
@@ -96,14 +103,14 @@ def processImages(prev, new):
 
 def getDiff(prev, new):
     diff = cv2.absdiff(prev, new)
-    ret, thresh = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
-    return thresh / 255
+    ret, diff = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
+    return diff
 
 def updateHeatmap(diff):
-    if len(heatmap) >= 60:
+    if len(heatmap) >= 30:
         heatmap.popleft()
     heatmap.append(diff)
-    
+
 
 def normalize(heatmap):
     maxp = numpy.amax(heatmap)
@@ -117,19 +124,20 @@ def sendData(api, data, location):
         print(json)
 
 def generateHeatmap(heatmap, room_id):
-    combined = numpy.zeros((1080, 1920), numpy.uint16)
+    combined = numpy.zeros((imageSize[1], imageSize[0]), numpy.uint16)
     for h in heatmap:
         combined = numpy.add(combined, h)
     plt.axis('off')
     plt.figure(figsize=(20,10))
     hmap = plt.imshow(normalize(combined))
     hmap.set_cmap('nipy_spectral')
-    plt.savefig('heatmap' + room_id + '.png', bbox_inches='tight')
+    plt.axis('off')
+    plt.savefig(folder + 'heatmap_' + room_id + '.png', bbox_inches='tight')
     plt.close()
 
 def main(url, room_id, interval, maxIterations):
     prev = cv2.blur(getImageFromUrl(url), (br,br))
-    heatmap.append(numpy.zeros((1080, 1920), numpy.uint8))
+    heatmap.append(numpy.zeros((imageSize[1], imageSize[0]), numpy.uint8))
 
     i = 0
     while i != maxIterations:
@@ -138,12 +146,12 @@ def main(url, room_id, interval, maxIterations):
         data = compareImages(prev, new)
         updateHeatmap(getDiff(prev, new))
         generateHeatmap(heatmap, room_id)
-        
+
         sendData(api, data, room_id)
         prev = processImages(prev, new)
-        
+
         i += 1
-        
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print('Missing parameters: url(address to fetch images) room_id(integer) interval(minutes) max_iterations(-1 for infinite)')
@@ -152,7 +160,5 @@ if __name__ == "__main__":
         room_id = sys.argv[2]
         interval = int(sys.argv[3])
         max_iterations = int(sys.argv[4])
-        
-        main(url, room_id, interval, max_iterations)
 
-            
+        main(url, room_id, interval, max_iterations)

@@ -1,0 +1,33 @@
+.title {
+  text-align: center;
+}
+
+.overlay > img {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.top {
+  z-index: 2;
+}
+
+.transparent {
+  opacity: 0.5;
+  transform: scale(1.03, 1.04);
+  margin-left: -10px;
+}
+
+.transparent:hover {
+  opacity: 0.0;
+}
+
+td {
+	width: 50%;
+  position: relative;
+  /*overflow-x: hidden;*/
+  /*overflow: hidden;*/
+}
+img {
+  max-width: 100%;
+}

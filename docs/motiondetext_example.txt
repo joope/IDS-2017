@@ -1,2 +1,3 @@
-python ./motiondetect.py http://haba.tko-aly.fi/kuvat/webcam2.jpg 1 60 2440
+python ../motiondetect.py http://haba.tko-aly.fi/kuvat/webcam2.jpg 1 60 2440
+
 # read image 1/min for 48h and post it as '1' to api. Generate heatmap from 60 latest images.
