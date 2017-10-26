@@ -12,8 +12,9 @@ import matplotlib.dates as dates
 import seaborn as sns
 import pytz
 import sys
+import os
 
-folder = 'public/'
+folder = 'public'
 
 def get_data():
     response = urllib.request.urlopen('http://siika.es:1337/motion')
@@ -83,7 +84,7 @@ def line_plot(df, change_type, image_name):
     plt.gca().xaxis.set_major_locator(locator)
     plt.ylim((0,y_height))
     plt.plot(df['createdAt'],mean)
-    plt.savefig(folder + image_name, bbox_inches='tight')
+    plt.savefig(os.path.join(folder, image_name), bbox_inches='tight')
 
 
 if __name__ == "__main__":
