@@ -53,14 +53,16 @@ def generateHeatmap(heatmap, room_id):
     plt.savefig(folder + 'heatmap_' + room_id + '.png', bbox_inches='tight')
     plt.close()
 
-def main(interval, maxIterations):
+def main(hours):
+    interval = 60
+    maxIterations = 60 * hours
     prev1 = cv2.blur(getImageFromUrl(sources[0]), (br,br))
     prev2 = cv2.blur(getImageFromUrl(sources[1]), (br,br))
     heatmap1 = numpy.zeros((imageSize[1], imageSize[0]), numpy.uint16)
     heatmap2 = numpy.zeros((imageSize[1], imageSize[0]), numpy.uint16)
 
     i = 0
-    while i != maxIterations:
+    while i < maxIterations:
         time.sleep(interval)
         new1 = cv2.blur(getImageFromUrl(sources[0]), (br,br))
         new2 = cv2.blur(getImageFromUrl(sources[1]), (br,br))
@@ -74,10 +76,9 @@ def main(interval, maxIterations):
         i += 1
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('Missing parameters: url(address to fetch images) room_id(integer) interval(minutes) max_iterations(-1 for infinite)')
+    if len(sys.argv) < 1:
+        print('Give time in hours')
     else:
-        interval = int(sys.argv[1])
-        max_iterations = int(sys.argv[2])
+        hours = int(sys.argv[1])
 
-        main(interval, max_iterations)
+        main(hours)
