@@ -106,16 +106,6 @@ def getDiff(prev, new):
     ret, diff = cv2.threshold(diff, 5, 255, cv2.THRESH_BINARY)
     return diff
 
-def updateHeatmap(diff):
-    if len(heatmap) >= 30:
-        heatmap.popleft()
-    heatmap.append(diff)
-
-
-def normalize(heatmap):
-    maxp = numpy.amax(heatmap)
-    return heatmap / maxp
-
 def sendData(api, data, location):
     if(data):
         data['location'] = location
@@ -123,33 +113,16 @@ def sendData(api, data, location):
         json = urlopen(request).read().decode()
         print(json)
 
-def generateHeatmap(heatmap, room_id):
-    combined = numpy.zeros((imageSize[1], imageSize[0]), numpy.uint16)
-    for h in heatmap:
-        combined = numpy.add(combined, h)
-    plt.axis('off')
-    plt.figure(figsize=(20,10))
-    hmap = plt.imshow(normalize(combined))
-    hmap.set_cmap('nipy_spectral')
-    plt.axis('off')
-    plt.savefig(folder + 'heatmap_' + room_id + '.png', bbox_inches='tight')
-    plt.close()
-
 def main(url, room_id, interval, maxIterations):
     prev = cv2.blur(getImageFromUrl(url), (br,br))
-    heatmap.append(numpy.zeros((imageSize[1], imageSize[0]), numpy.uint8))
 
     i = 0
     while i != maxIterations:
         time.sleep(interval)
         new = cv2.blur(getImageFromUrl(url), (br,br))
         data = compareImages(prev, new)
-        updateHeatmap(getDiff(prev, new))
-        generateHeatmap(heatmap, room_id)
-
         sendData(api, data, room_id)
         prev = processImages(prev, new)
-
         i += 1
 
 if __name__ == "__main__":
