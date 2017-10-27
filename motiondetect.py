@@ -82,7 +82,7 @@ def compareImages(prev, new):
     # showImageAndWait(thresh)
 
     # Discard data if change is too much (i.e light switched off)
-    if(relativeThresholdChange >= 0.90 or relativeThresholdChange < 0.0001):
+    if(relativeThresholdChange >= 0.90 or relativeThresholdChange < 0.0005):
         return None
 
     data = {
