@@ -74,7 +74,7 @@ def filter_last_hours(df, hours):
 
 def line_plot(df, change_type, image_name, y_height):
 
-    mean = df[change_type].rolling(30).mean()
+    mean = df[change_type].rolling(15).mean()
     change_type = 'mean'
     locator = dates.HourLocator(range(0, 24, 1))
     formatter = dates.DateFormatter('%H')
@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     normalized = normalize(data)
 
-    y_height = normalized[change_type].rolling(30).mean().max()
+    y_height = normalized[change_type].rolling(15).mean().max()
 
     normalized_first = normalized.loc[normalized['location'] == '0']
     normalized_second = normalized.loc[normalized['location'] == '1']
