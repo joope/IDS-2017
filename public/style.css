@@ -15,9 +15,9 @@
   top: 0;
 }
 
-.heatmap:hover {
+/*.heatmap:hover {
   opacity: 0.0;
-}
+}*/
 
 td {
   overflow: hidden;
